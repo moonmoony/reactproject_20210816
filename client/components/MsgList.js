@@ -15,6 +15,8 @@ const originalMsgs = Array(50)
 }))
 //.reverse()
 
+//console.log(JSON.stringify(originalMsgs))
+
 const MsgList = () => {
     const [msgs, setMsgs] = useState(originalMsgs)
 
