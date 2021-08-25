@@ -1,6 +1,6 @@
 import MsgInput from "./MsgInput"
 
-const MsgItem = ({ id, userId, timestamp, text, onUpdate, onDelete, isEditing, startEdit }) => (
+const MsgItem = ({ id, userId, timestamp, text, onUpdate, onDelete, isEditing, startEdit, myId }) => (
     <li className="messages__item">
         <h3>
             {userId}{' '}
@@ -24,10 +24,12 @@ const MsgItem = ({ id, userId, timestamp, text, onUpdate, onDelete, isEditing, s
             text
         )} 
 
-        <div className="messages__buttons">
-            <button onClick={startEdit}>수정</button>
-            <button onClick={onDelete}>삭제</button>
-        </div>
+        {myId === userId && ( //주소창에 입력된 myId랑 userId랑 같으면 수정삭제버튼을 보여줘라!
+            <div className="messages__buttons">
+                <button onClick={startEdit}>수정</button>
+                <button onClick={onDelete}>삭제</button>
+            </div>
+        )}
     </li>
 )
 

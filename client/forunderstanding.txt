@@ -1,0 +1,70 @@
+- forunderstanding.txt line number 1 ref
+
+server/src/routes/messages.js의 get메소드를 보면
+
+    method: 'get',
+    route: '/messages',
+    handler: (req, res) => {
+        //const msgs = readDB('messages')
+        const msgs = getMsgs() //1. 데이터에 있는 거 불러와서 
+        res.send(msgs) //2. 메시지를 전달해라
+    }
+
+3. 이 전달된 메시지들이 fetcher.js의 fetcher를 통해서 response에 담기고 
+
+    axios.defaults.baseURL = 'http://localhost:8000' 
+
+    const fetcher = async (method, url, ...rest) => { 
+        const res = await axios[method](url, ...rest) 
+        return res.data //4. response 응답값 중에 data라는 프로퍼티에 있는 내용만 
+    }
+
+5. MsgList.js의 const msgs에 담기게 되고 
+
+    const getMessages = async () => {
+        const msgs = await fetcher('get', '/messages')
+        setMsgs(msgs) //6. set해줘서 state가 바뀌게 되고 화면에 뿌려짐
+    }
+    useEffect(() => {
+        getMessages()
+    }, [])
+
+- forunderstanding.txt line number 32 ref
+
+    //const onCreate = text => { //useEffect내에서 쓰이는 게 아니라서 async 바로 쓸 수 있음
+    const onCreate = async text => {
+        /**
+         * post는 인자가 2개였으니까
+         * url은 messages이고 config는 해당 메소드의 바디에 있는게 들어와야하므로 
+         * messages.js에서 post가 body.text, body.userId 이니까 text, userId가 됨
+        */
+        const newMsg = await fetcher('post', '/messages', { text, userId })
+        const newMsg = {
+            id: msgs.length + 1,
+            userId: getRandomUserId(),
+            timestamp: Date.now(),
+            text: `${msgs.length + 1} ${text}`,
+        }
+        setMsgs(msgs => [newMsg, ...msgs])
+        //msgs.unshift(newMsg)
+        //console.log(msgs)
+    }
+
+query 즉, 주소창에 localhost:3000/?userId=moony를 입력하고 글을 입력하면 
+moony로 로그인해서 글을 입력하는 것과 같은 기능 구현 확인 가능
+
+- forunderstanding.txt line number 56 ref
+
+//fetcher(axios)를 import하면서 originalMsgs를 지워줌
+const originalMsgs = Array(50)
+    .fill(0)
+    .map((_, i) => ({
+        id: 50 - i, //id: i + 1,
+        userId: getRandomUserId(),
+        timestamp: 1234567890123 + (50 - i) * 1000 * 60, //timestamp: 1234567890123 + i * 1000 * 60,
+        text: `${50 - i} mock text`, //text: `${i + 1} mock text`,
+}))
+//.reverse()
+
+//console.log(JSON.stringify(originalMsgs))
+
