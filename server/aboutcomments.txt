@@ -68,3 +68,81 @@ res.send(imurcoworker)
 따라서 server/src/db/messages.json의 id부분이 숫자로 되어있다면 ""안에 넣어 문자열로 바꿔줘야함
 
 Aㅏ... 이부분 자동 바꾸는 방법 몰라서 노가다 함 화나는군... 
+
+- messages.js의 DELETE 부분
+
+    { //DELETE MESSAGES
+        method: 'delete',
+        route: '/messages/:id',
+        handler: ({ body, params:{ id }}, res) => {
+            try {
+                const msgs = getMsgs()
+                const targetIndex = msgs.findIndex(msg => msg.id === id)
+                if (targetIndex < 0) throw '메시지가 없습니다.'
+                if (msgs[targetIndex].userId !== body.userId) throw '사용자가 다릅니다.'
+
+                msgs.splice(targetIndex, 1)
+                setMsgs(msgs) 
+                res.send(id) //삭제가 성공했을때 해당 id가 삭제되었다는 것을 제공하게 됨
+            } catch (err) {
+                res.status(500).send( { error: err }) 
+            }
+        }
+    }
+
+axios의 GET과 DELETE는 인자가 1개이고 url부분 뒤에 붙는 data를 받는 영역이 없으므로 
+즉, userId라는 객체가 config 안에 들어가 있는 것임
+따라서 params가 아니라 query 또는 url에 입력된 값을 가져와서 비교해야함
+
+즉, MsgList > onDelete의 
+const receivedId = await fetcher('delete', `/messages/${id}?userId={userId}`, { params: {userId }})
+또는 const receivedId = await fetcher('delete', `/messages/${id}`, { userId })
+
+- request 확인하는 부분 추가
+
+        method: 'delete',
+        route: '/messages/:id',
+        handler: (req, res) => {
+            console.log(req)
+            const {
+                params: { id },
+                query: { userId },
+            } = req
+            try {
+                const msgs = getMsgs()
+                const targetIndex = msgs.findIndex(msg => msg.id === id)
+                if (targetIndex < 0) throw '메시지가 없습니다.'
+                if (msgs[targetIndex].userId !== userId) throw '사용자가 다릅니다.'
+
+                msgs.splice(targetIndex, 1)
+                setMsgs(msgs) 
+                res.send(id) //삭제가 성공했을때 해당 id가 삭제되었다는 것을 제공하게 됨
+            } catch (err) {
+                res.status(500).send( { error: err }) 
+            }
+        }
+
+!!!즉!!!
+MsgList의 delete는 id를 보내고 뒤에 params를 보내고 
+이 params라고 하는 값은 서버 단인 messages.js에서 query로 받게 된다.
+
+//원본
+    { //DELETE MESSAGES
+        method: 'delete',
+        route: '/messages/:id',
+        handler: ({ params:{ id }, query: { userId } }, res) => { //aboutcomments.txt ln72 참고
+            console.log(req) //aboutcomments.txt ln101 참고
+            try {
+                const msgs = getMsgs()
+                const targetIndex = msgs.findIndex(msg => msg.id === id)
+                if (targetIndex < 0) throw '메시지가 없습니다.'
+                if (msgs[targetIndex].userId !== userId) throw '사용자가 다릅니다.'
+
+                msgs.splice(targetIndex, 1)
+                setMsgs(msgs) 
+                res.send(id) //삭제가 성공했을때 해당 id가 삭제되었다는 것을 제공하게 됨
+            } catch (err) {
+                res.status(500).send( { error: err }) 
+            }
+        }
+    }

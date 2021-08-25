@@ -68,3 +68,35 @@ const originalMsgs = Array(50)
 
 //console.log(JSON.stringify(originalMsgs))
 
+- forunderstanding.txt line number 71 ref
+
+    //UPDATE 
+    const onUpdate = (text, id) => {
+        setMsgs(msgs => {
+            const targetIndex = msgs.findIndex(msg => msg.id === id) //입력받은 id랑 같은 msg.id를 찾기
+            if (targetIndex < 0) return msgs //같은 id가 없으면 -1이 나오는데 그 경우, msgs 처리(return msgs)
+
+            const newMsgs = [ ...msgs ] //msgs를 펼쳐서 새로운 배열로 만들어주는 부분
+            newMsgs.splice(targetIndex, 1, { //msgs를 splice로 나눠준 후 새로운 msgs를 만들어 주는 부분
+                ...msgs[targetIndex], //기존 msgs를 통째로 가져와서 
+                text, //새로운 text데이터로 바꿔주면 됨
+            })
+            return newMsgs
+        })
+        doneEdit()
+    }
+
+- forunderstanding.txt line number 89 ref
+
+    const onDelete = (id) => {
+        setMsgs(msgs => {
+            const targetIndex = msgs.findIndex(msg => msg.id === id) 
+            if (targetIndex < 0) return msgs
+            
+            const newMsgs = [ ...msgs ]
+            newMsgs.splice(targetIndex, 1)
+            return newMsgs
+        })
+    }
+
+    const doneEdit = () => setEditingId(null)
