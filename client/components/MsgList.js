@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
 import fetcher from '../fetcher'
+import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
 //delete까지 axios로 구현 후에는 randomuserid를 쓸일이 없으니까 지워줌
 //const UserIds = ['moony', 'wooky']
@@ -21,6 +22,9 @@ const MsgList = () => {
 
     const [msgs, setMsgs] = useState([]) //useState([originalMsgs]) -> useState([]) fetcher사용으로 빈배열로 변경
     const [editingId, setEditingId] = useState(null) //MsgItem 하단의 startEdit 수정버튼 기능구현
+    const [hasNext, setHasNext] = useState(true)
+    const fetchMoreEl = useRef(null)
+    const intersecting = useInfiniteScroll(fetchMoreEl) //intersecting 값이 true인지 false인지 달라질 것!
 
     //CREATE 
     /** forunderstanding.txt line number 32 ref */
@@ -65,13 +69,24 @@ const MsgList = () => {
     /** forunderstanding.txt line number 1 ref */
     //useEffect로 최초 동작시에만 실행되도록 함
     const getMessages = async () => {
-        const msgs = await fetcher('get', '/messages')
-        setMsgs(msgs)
+        const newMsgs = await fetcher('get', '/messages', { params: { cursor: msgs[msgs.length - 1]?.id || '' }}) //cursor는 맨 마지막에 있는 메시지의 id값을 넘겨주기
+        if (newMsgs.length === 0) {
+            setHasNext(false)
+            return
+        }
+        //setMsgs(newMsgs)
+        setMsgs(msgs => [...msgs, ...newMsgs]) //스크롤이 되었을때 새로 생기는 메시지 목록이 newMsgs이고 기존이 msgs이니 기존 뒤에 붙도록 처리
     }
     //useEffect(async () => { //await를 쓰려면 async를 불러와야하는데 useEffect 내에서는 직접 하지 않기때문에 윗줄과 같이 처리필요
+    /*
     useEffect(() => {
         getMessages()
     }, [])
+    */
+
+    useEffect(() => {
+        if(intersecting && hasNext) getMessages()
+    }, [intersecting])
 
     //const startEdit = id => setEditingId(id)
 
@@ -91,6 +106,7 @@ const MsgList = () => {
                 />
                 ))}
             </ul>
+            <div ref={fetchMoreEl} />
         </>
     )
 }

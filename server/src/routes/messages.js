@@ -9,10 +9,12 @@ const messagesRoute = [
     { //GET MESSAGES 데이터 불러오기
         method: 'get',
         route: '/messages',
-        handler: (req, res) => {
+        handler: ({ query: { cursor = '' }}, res) => {
             //const msgs = readDB('messages') //readDB는 dbController.js에서 옴 > 전역함수로 밖에 빼줌
             const msgs = getMsgs()
-            res.send(msgs) //결국 client(view) 단의 data를 db에 저장 시키기 위한 행위
+            const fromIndex = msgs.findIndex(msg => msg.id === cursor) + 1
+            //res.send(msgs) //결국 client(view) 단의 data를 db에 저장 시키기 위한 행위
+            res.send(msgs.slice(fromIndex, fromIndex + 15)) //15개씩 불러오도록 처리
         }
     },
 
