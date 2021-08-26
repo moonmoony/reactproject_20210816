@@ -11,7 +11,7 @@ import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
 /** forunderstanding.txt line number 56 ref */
 
-const MsgList = () => {
+const MsgList = ({ smsgs, users }) => {
     /*
     이 query의 userId를 MsgItem에서도 사용해주면 로그인된 아이디 별로 수정삭제 버튼 기능을 구현할 수 있음 
     MsgList하단에 myId 추가 부분과 MsgItem.js의 ln3 참조
@@ -20,7 +20,7 @@ const MsgList = () => {
     const { query } = useRouter()
     const userId = query.userId || query.userid || ''
 
-    const [msgs, setMsgs] = useState([]) //useState([originalMsgs]) -> useState([]) fetcher사용으로 빈배열로 변경
+    const [msgs, setMsgs] = useState(smsgs) //useState([originalMsgs]) -> useState([]) fetcher사용으로 빈배열로 변경
     const [editingId, setEditingId] = useState(null) //MsgItem 하단의 startEdit 수정버튼 기능구현
     const [hasNext, setHasNext] = useState(true)
     const fetchMoreEl = useRef(null)
@@ -69,7 +69,7 @@ const MsgList = () => {
     /** forunderstanding.txt line number 1 ref */
     //useEffect로 최초 동작시에만 실행되도록 함
     const getMessages = async () => {
-        const newMsgs = await fetcher('get', '/messages', { params: { cursor: msgs[msgs.length - 1]?.id || '' }}) //cursor는 맨 마지막에 있는 메시지의 id값을 넘겨주기
+        const newMsgs = await fetcher('get', '/messages', { params: { cursor: msgs[msgs.length - 1]?.id || '' } }) //cursor는 맨 마지막에 있는 메시지의 id값을 넘겨주기
         if (newMsgs.length === 0) {
             setHasNext(false)
             return
@@ -85,10 +85,12 @@ const MsgList = () => {
     */
 
     useEffect(() => {
-        if(intersecting && hasNext) getMessages()
+        if (intersecting && hasNext) getMessages()
     }, [intersecting])
 
     //const startEdit = id => setEditingId(id)
+
+    //console.log('render')
 
     return (
         <>
@@ -103,6 +105,7 @@ const MsgList = () => {
                     startEdit={() => setEditingId(x.id)} 
                     isEditing={editingId === x.id} 
                     myId={userId}
+                    user={users[x.userId]}
                 />
                 ))}
             </ul>
