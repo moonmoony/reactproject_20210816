@@ -146,3 +146,10 @@ MsgList의 delete는 id를 보내고 뒤에 params를 보내고
             }
         }
     }
+
+- resolvers/user.js
+
+        /*
+        db/user.json - moony라는 키값이 아닌 배열 정보 안의 { "id": "moony", "nickname": "무니" } 에서 
+        schema/user.js - users: [User!]! 객체만 가져오기로 정의되어 있으므로 db값을 object로 변환해줘야 함
+        */

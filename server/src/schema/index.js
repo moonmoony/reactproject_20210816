@@ -1,15 +1,15 @@
 import { gql } from 'apollo-server-express'
-import messageSchema from './message'
-import userSchema from './user'
+import messageSchema from './message.js'
+import userSchema from './user.js'
 
 const linkSchema = gql`
     type Query {
-        : Boolean
+        _: Boolean
     }
 
     type Mutation {
-        : Boolean
+        _: Boolean
     }
 `
 
-export default [linkShcema, messageSchema, userSchema]
+export default [linkSchema, messageSchema, userSchema]
